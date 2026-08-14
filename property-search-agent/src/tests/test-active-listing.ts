@@ -1,4 +1,4 @@
-import { searchActiveListings } from "../activeListings";
+import { searchActiveListings } from "../search-active-listings";
 
 async function main() {
   const listings = await searchActiveListings(

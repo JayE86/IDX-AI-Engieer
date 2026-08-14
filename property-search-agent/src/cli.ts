@@ -1,7 +1,8 @@
 import * as readline from "node:readline";
 
-import { pool } from "./mysql";
-import { propertySearchSkill } from "./propertySearchSkill";
+import { closeDatabase } from "./mysql";
+import { handleActiveListingConversation } from "./active-listing-orchestration";
+
 
 type OpenClawChannelContext = {
   senderId?: string;
@@ -13,8 +14,10 @@ type OpenClawChannelContext = {
   from?: string;
 };
 
+
 function getSessionUserId(): string {
-  const rawContext = process.env.OPENCLAW_CHANNEL_CONTEXT;
+  const rawContext =
+    process.env.OPENCLAW_CHANNEL_CONTEXT;
 
   if (!rawContext) {
     return "local-test-user";
@@ -43,17 +46,22 @@ function getSessionUserId(): string {
   }
 }
 
+
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
+
 const userId = getSessionUserId();
 let isClosing = false;
 
+
 console.log("Conversational Property Search");
+console.log("Search active property listings.");
 console.log('Type "exit" or "quit" to close the program.');
 console.log(`Session user ID: ${userId}`);
+
 
 async function closeCli(): Promise<void> {
   if (isClosing) {
@@ -64,15 +72,21 @@ async function closeCli(): Promise<void> {
   rl.close();
 
   try {
-    await pool.end();
+    await closeDatabase();
   } catch (error: unknown) {
-    console.error("Failed to close the database pool:", error);
+    console.error(
+      "Failed to close the database pool:",
+      error
+    );
   }
 }
 
+
 function askForMessage(): void {
   rl.question("\nYou: ", async (query) => {
-    const normalizedQuery = query.trim().toLowerCase();
+    const trimmedQuery = query.trim();
+    const normalizedQuery =
+      trimmedQuery.toLowerCase();
 
     if (
       normalizedQuery === "exit" ||
@@ -82,23 +96,30 @@ function askForMessage(): void {
       return;
     }
 
-    if (!normalizedQuery) {
-      console.log("Agent: Please enter a property search request.");
+    if (!trimmedQuery) {
+      console.log(
+        "Agent: Please enter a property search request."
+      );
     } else {
       try {
-        const result = await propertySearchSkill({
-          query,
+        const result =
+          await handleActiveListingConversation({
+          query: trimmedQuery,
           userId,
         });
 
-        console.log(`Agent: ${result.response}`);
+        console.log(
+          `\nAgent:\n${result.response}`
+        );
       } catch (error: unknown) {
         const message =
           error instanceof Error
             ? error.message
             : String(error);
 
-        console.error(`Request failed: ${message}`);
+        console.error(
+          `\nRequest failed: ${message}`
+        );
       }
     }
 
@@ -108,8 +129,10 @@ function askForMessage(): void {
   });
 }
 
+
 process.on("SIGINT", () => {
   void closeCli();
 });
+
 
 askForMessage();

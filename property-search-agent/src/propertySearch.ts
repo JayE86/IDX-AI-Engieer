@@ -1,17 +1,17 @@
-import type { PropertyFilter } from "./parsePropertyQuery";
+import type { PropertyFilter } from "./parse-property-query";
 
 import {
   parsePropertyQuery,
   mapToDbFilters,
-} from "./parsePropertyQuery";
+} from "./parse-property-query";
 
-import { searchActiveListings } from "./activeListings";
-import { getSoldComps } from "./soldComps";
+import { searchActiveListings } from "./search-active-listings";
+import { getSoldComps } from "./search-sold-property";
 
 import {
   formatActiveListings,
   formatSoldComps,
-} from "./propertycards";
+} from "./property-cards";
 
 /**
  * Runs a property search from an already-parsed set of filters.

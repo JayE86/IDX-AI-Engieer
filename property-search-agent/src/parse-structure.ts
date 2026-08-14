@@ -2,12 +2,24 @@ import type { RowDataPacket } from "mysql2";
 
 export interface PropertyFilters {
   city?: string;
-  maxPrice?: number;
+
   minPrice?: number;
-  beds?: number;
-  baths?: number;
-  sqft?: number;
-  type?: string;
+  maxPrice?: number;
+
+  minBeds?: number;
+  maxBeds?: number;
+
+  minBaths?: number;
+  maxBaths?: number;
+
+  minSqft?: number;
+  maxSqft?: number;
+
+  minHOA?: number;
+  maxHOA?: number;
+
+  propertyType?: string;
+
   pool?: string;
   hasView?: string;
 }

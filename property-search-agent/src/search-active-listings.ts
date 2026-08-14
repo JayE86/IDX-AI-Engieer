@@ -2,7 +2,7 @@ import { query } from "./mysql";
 import type {
   ListingRow,
   PropertyFilters,
-} from "./property";
+} from "./parse-structure";
 
 export async function searchActiveListings(
   filters: PropertyFilters,
@@ -30,6 +30,7 @@ export async function searchActiveListings(
       LMD_MP_Longitude AS longitude,
       YearBuilt AS yearBuilt,
       DaysOnMarket AS daysOnMarket,
+      AssociationFee AS hoa,
       PoolPrivateYN AS pool,
       ViewYN AS hasView,
       PhotoCount AS photoCount,
@@ -42,9 +43,16 @@ export async function searchActiveListings(
 
   const params: unknown[] = [];
 
+  // City
   if (filters.city) {
     sql += " AND L_City = ?";
     params.push(filters.city);
+  }
+
+  // Price
+  if (filters.minPrice !== undefined) {
+    sql += " AND L_SystemPrice >= ?";
+    params.push(filters.minPrice);
   }
 
   if (filters.maxPrice !== undefined) {
@@ -52,37 +60,64 @@ export async function searchActiveListings(
     params.push(filters.maxPrice);
   }
 
-  if (filters.minPrice !== undefined) {
-    sql += " AND L_SystemPrice >= ?";
-    params.push(filters.minPrice);
-  }
-
-  if (filters.beds !== undefined) {
+  // Bedrooms
+  if (filters.minBeds !== undefined) {
     sql += " AND L_Keyword2 >= ?";
-    params.push(filters.beds);
+    params.push(filters.minBeds);
   }
 
-  if (filters.baths !== undefined) {
+  if (filters.maxBeds !== undefined) {
+    sql += " AND L_Keyword2 <= ?";
+    params.push(filters.maxBeds);
+  }
+
+  // Bathrooms
+  if (filters.minBaths !== undefined) {
     sql += " AND LM_Dec_3 >= ?";
-    params.push(filters.baths);
+    params.push(filters.minBaths);
   }
 
-  if (filters.sqft !== undefined) {
+  if (filters.maxBaths !== undefined) {
+    sql += " AND LM_Dec_3 <= ?";
+    params.push(filters.maxBaths);
+  }
+
+  // Square footage
+  if (filters.minSqft !== undefined) {
     sql += " AND LM_Int2_3 >= ?";
-    params.push(filters.sqft);
+    params.push(filters.minSqft);
   }
 
-  if (filters.type) {
+  if (filters.maxSqft !== undefined) {
+    sql += " AND LM_Int2_3 <= ?";
+    params.push(filters.maxSqft);
+  }
+
+  // HOA
+  if (filters.minHOA !== undefined) {
+    sql += " AND AssociationFee >= ?";
+    params.push(filters.minHOA);
+  }
+
+  if (filters.maxHOA !== undefined) {
+    sql += " AND AssociationFee <= ?";
+    params.push(filters.maxHOA);
+  }
+
+  // Property type
+  if (filters.propertyType) {
     sql += " AND L_Type_ = ?";
-    params.push(filters.type);
+    params.push(filters.propertyType);
   }
 
-  if (filters.pool) {
+  // Pool
+  if (filters.pool !== undefined) {
     sql += " AND PoolPrivateYN = ?";
     params.push(filters.pool);
   }
 
-  if (filters.hasView) {
+  // View
+  if (filters.hasView !== undefined) {
     sql += " AND ViewYN = ?";
     params.push(filters.hasView);
   }
