@@ -1,8 +1,8 @@
 import * as readline from "node:readline";
 
-import { answerMarketQuestion } from "./answerMarketQuestion";
-import { getSupportedMarketCities } from "./marketCities";
-import { pool } from "./mysql";
+import { answerMarketQuestion } from "./answer-market-question";
+import { getSupportedMarketCities } from "./query-city";
+import { closeDatabase } from "./mysql";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -24,7 +24,7 @@ async function closeCli(): Promise<void> {
   rl.close();
 
   try {
-    await pool.end();
+    await closeDatabase();
   } catch (error: unknown) {
     console.error("Failed to close the database pool:", error);
   }
